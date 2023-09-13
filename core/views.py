@@ -7,7 +7,7 @@ from django.contrib.auth import authenticate, login, logout
 
 # Create your views here.
 
-# def index_redirect():       AQUI FOI SO UMA MANEIRA DE REDIRECIONAR A PÁGINA QUANDO A URL TA PURA
+# def index_redirect():   AQUI FOI SO UMA MANEIRA DE REDIRECIONAR A PÁGINA QUANDO A URL TA PURA
 #    return redirect('/agenda/')
 
 def login_user(request):
@@ -51,11 +51,13 @@ def eventos(request):
 def submit_eventos(request):
     if request.POST:
         titulo = request.POST.get('titulo')
+        local = request.POST.get('local')
         data_evento = request.POST.get('data_evento')
         descricao = request.POST.get('descricao')
         usuario = request.user
         Evento.objects.create(titulo=titulo,
+                              local=local,
                               data_evento=data_evento,
                               descricao=descricao,
-                              usuario=usuario)
+                              usuario=usuario,)
     return redirect('/')
