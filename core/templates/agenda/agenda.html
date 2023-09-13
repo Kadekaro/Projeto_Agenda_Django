@@ -1,9 +1,11 @@
 {% extends "agenda/page.html" %}
 
 {% block content %}
-    <h2>Agendamentos:</h2>
-
-    <ul style="font-size: 22px">
+    <h2>Agendamentos</h2>
+    <a href="evento/">
+        <button type="button">+ Novo evento</button>
+    </a>
+    <ul style="font-size: 20px">
     {% for evento in eventos %}
         <li> {{ evento.titulo }} - {{ evento.get_data_evento }} </li>
     {% endfor %}

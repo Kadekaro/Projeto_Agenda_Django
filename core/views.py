@@ -10,7 +10,6 @@ from django.contrib.auth import authenticate, login, logout
 # def index_redirect():       AQUI FOI SO UMA MANEIRA DE REDIRECIONAR A PÁGINA QUANDO A URL TA PURA
 #    return redirect('/agenda/')
 
-
 def login_user(request):
     return render(request, 'agenda/login.html')
 
@@ -41,3 +40,22 @@ def lista_eventos(request):
     evento = Evento.objects.filter(usuario=usuario)
     dados = {'eventos': evento}
     return render(request, 'agenda/agenda.html', dados)
+
+
+@login_required(login_url='/login/')
+def eventos(request):
+    return render(request, 'agenda/eventos.html')
+
+
+@login_required(login_url='/login/')
+def submit_eventos(request):
+    if request.POST:
+        titulo = request.POST.get('titulo')
+        data_evento = request.POST.get('data_evento')
+        descricao = request.POST.get('descricao')
+        usuario = request.user
+        Evento.objects.create(titulo=titulo,
+                              data_evento=data_evento,
+                              descricao=descricao,
+                              usuario=usuario)
+    return redirect('/')
