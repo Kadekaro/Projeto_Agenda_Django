@@ -23,5 +23,8 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("agenda/", views.lista_eventos),
     # path("", views.index_redirect), ABAIXO COLOCO UMA FORMA DE REDIRECIONAMENTO DIRETO NO URL
-    path("", RedirectView.as_view(url='/agenda/'))
+    path("", RedirectView.as_view(url='/agenda/')),
+    path("login/", views.login_user),
+    path("login/submit", views.submit_login),
+    path("logout/", views.logout_user),
 ]
