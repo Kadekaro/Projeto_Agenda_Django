@@ -3,6 +3,9 @@ from django.contrib import messages
 from django.shortcuts import render, redirect
 from core.models import Evento
 from django.contrib.auth import authenticate, login, logout
+from datetime import datetime, timedelta
+from django.http.response import Http404, JsonResponse
+from django.contrib.auth.models import User
 
 
 # Create your views here.
@@ -37,7 +40,9 @@ def lista_eventos(request):
     # evento = Evento.objects.get(id=1)
     # evento = Evento.objects.all()
     usuario = request.user
-    evento = Evento.objects.filter(usuario=usuario)
+    data_atual = datetime.now() - timedelta(hours=1)
+    evento = Evento.objects.filter(usuario=usuario,
+                                   data_evento__gt=data_atual)
     dados = {'eventos': evento}
     return render(request, 'agenda/agenda.html', dados)
 
@@ -83,7 +88,25 @@ def submit_eventos(request):
 @login_required(login_url='/login/')
 def delete_evento(request, id_evento):
     usuario = request.user
-    evento = Evento.objects.get(id=id_evento)
+    try:
+        evento = Evento.objects.get(id=id_evento)
+    except Exception:
+        raise Http404()
     if usuario == evento.usuario:
         evento.delete()
+    else:
+        raise Http404()
     return redirect('/')
+
+
+# @login_required(login_url='/login/')
+# def json_lista_eventos(request):
+#     usuario = request.user
+#     evento = Evento.objects.filter(usuario=usuario).values('id', 'titulo')
+#     return JsonResponse(list(evento), safe=False, json_dumps_params={'ensure_ascii': False})
+
+
+def json_lista_eventos(request, id_usuario):  # O id_usuario está vindo da url agenda/evento/
+    usuario = User.objects.get(id=id_usuario)
+    evento = Evento.objects.filter(usuario=usuario).values('id', 'titulo')
+    return JsonResponse(list(evento), safe=False, json_dumps_params={'ensure_ascii': False})
