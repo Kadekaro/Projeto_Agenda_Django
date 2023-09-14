@@ -24,9 +24,12 @@ def logout_user(request):
 
 def submit_login(request):
     if request.POST:
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        usuario = authenticate(username=username, password=password)
+        try:
+            username = request.POST.get('username')
+            password = request.POST.get('password')
+            usuario = authenticate(username=username, password=password)
+        except Exception:
+            raise Http404
         if usuario is not None:
             login(request, usuario)
             return redirect('/')
@@ -39,18 +42,24 @@ def submit_login(request):
 def lista_eventos(request):
     # evento = Evento.objects.get(id=1)
     # evento = Evento.objects.all()
-    usuario = request.user
-    data_atual = datetime.now() - timedelta(hours=1)
-    evento = Evento.objects.filter(usuario=usuario,
-                                   data_evento__gt=data_atual)
-    dados = {'eventos': evento}
+    try:
+        usuario = request.user
+        data_atual = datetime.now() - timedelta(hours=1)
+        evento = Evento.objects.filter(usuario=usuario,
+                                       data_evento__gt=data_atual)
+        dados = {'eventos': evento}
+    except Exception:
+        raise Http404
     return render(request, 'agenda/agenda.html', dados)
 
 
 @login_required(login_url='/login/')
 def eventos(request):
-    id_evento = request.GET.get('id')
-    dados = {}
+    try:
+        id_evento = request.GET.get('id')
+        dados = {}
+    except Exception:
+        raise Http404
     if id_evento:
         dados['evento'] = Evento.objects.get(id=id_evento)
     return render(request, 'agenda/eventos.html', dados)
@@ -66,7 +75,10 @@ def submit_eventos(request):
         usuario = request.user
         id_evento = request.POST.get('id_evento')
         if id_evento:
-            evento = Evento.objects.get(id=id_evento)
+            try:
+                evento = Evento.objects.get(id=id_evento)
+            except Exception:
+                raise Http404
             if evento.usuario == usuario:
                 evento.titulo = titulo
                 evento.descricao = descricao
@@ -76,6 +88,8 @@ def submit_eventos(request):
             #                                            local=local,
             #  Outro jeito de fazer                      data_evento=data_evento,
             #                                            descricao=descricao)
+            else:
+                raise Http404
         else:
             Evento.objects.create(titulo=titulo,
                                   local=local,
@@ -107,6 +121,17 @@ def delete_evento(request, id_evento):
 
 
 def json_lista_eventos(request, id_usuario):  # O id_usuario está vindo da url agenda/evento/
-    usuario = User.objects.get(id=id_usuario)
-    evento = Evento.objects.filter(usuario=usuario).values('id', 'titulo')
+    try:
+        usuario = User.objects.get(id=id_usuario)
+        evento = Evento.objects.filter(usuario=usuario).values('id', 'titulo')
+    except Exception:
+        raise Http404
     return JsonResponse(list(evento), safe=False, json_dumps_params={'ensure_ascii': False})
+
+
+@login_required(login_url='/login/')
+def historico_eventos(request):
+    usuario = request.user
+    evento = Evento.objects.filter(usuario=usuario)
+    dados = {'eventos': evento}
+    return render(request, 'agenda/historico.html', dados)
